@@ -2,7 +2,8 @@
 #SBATCH --job-name=pb-tier2
 #SBATCH --account=yzhao010_1531
 #SBATCH --partition=gpu
-#SBATCH --gpus-per-task=a40:1
+#SBATCH --gres=gpu:1
+#SBATCH --constraint="a40|a100|l40s"
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64G
 #SBATCH --time=12:00:00
