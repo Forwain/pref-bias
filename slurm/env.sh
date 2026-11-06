@@ -1,6 +1,6 @@
 # Sourced by every job script.
-module purge
-module load conda
+# (`module` is missing when jobs are submitted over a non-login ssh, so use conda's path directly)
+export PATH=/apps/conda/miniforge3/25.11.0-1/condabin:$PATH
 eval "$(conda shell.bash hook)"
 conda activate /scratch1/twang607/envs/pref-bias
 export PB_ROOT=/scratch1/twang607/pref-bias
