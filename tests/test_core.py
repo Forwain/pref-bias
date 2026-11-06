@@ -42,7 +42,8 @@ def test_verbosity_attack():
     P = np.tile([0.4, 0.4, 0.2], (4, 1))
     Q = np.array([[0.6, 0.3, 0.1], [0.3, 0.6, 0.1], [0.4, 0.4, 0.2], [0.5, 0.3, 0.2]])
     r = M.verbosity_attack(P, Q, np.array([0, 1, 0, 1]))
-    assert r["verb_success"] == 0.5 and r["verb_flip"] == 0.5
+    # rows 0 and 1 gain; only row 1 flips (row 0's padded side A was already the argmax of the A/B tie)
+    assert r["verb_success"] == 0.5 and r["verb_flip"] == 0.25
 
 
 def test_parse_turns_handles_null_and_surrogates():
