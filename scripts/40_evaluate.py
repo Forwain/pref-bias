@@ -5,7 +5,7 @@ For each run directory under outputs/ that has preds_test.parquet:
   position:   consistency and position bias (needs preds_test_swap)
   length:     slope of P(A)/(P(A)+P(B)) on log length ratio vs. the human slope
   verbosity:  gain / success / flip under the restate and filler probes
-  self-pref:  for --family (default llama)
+  self-pref:  for --family (default qwen, the judge family; for other tiers it is a control)
 A derived "<run>+swapTTA" row averages the original and un-swapped predictions
 (inference-time debiasing, no retraining). 95% bootstrap CIs on the key metrics.
 
@@ -58,7 +58,8 @@ def evaluate(name, P, P_swap, P_verb, test, family, B):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", nargs="*")
-    ap.add_argument("--family", default="llama")
+    ap.add_argument("--family", default="qwen",
+                    help="model family for the self-preference metric (the Tier 2 judge is Qwen)")
     ap.add_argument("--B", type=int, default=200)
     args = ap.parse_args()
 

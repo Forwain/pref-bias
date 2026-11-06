@@ -15,7 +15,7 @@ reliance on position, length and self-preference shortcuts shrink, or do they ex
 | `scripts/0x_*` | download, prepare, EDA, fetch model weights |
 | `scripts/10_tier0.py` | Tier 0 rules (class prior; length lookup table) |
 | `scripts/11_tier1.py` | Tier 1 LightGBM + attribution by feature family |
-| `scripts/20_tier2_judge.py` | Tier 2 zero-shot Llama-3-8B judge (vLLM), raw + calibrated, rationales |
+| `scripts/20_tier2_judge.py` | Tier 2 zero-shot Qwen2.5-7B-Instruct judge (vLLM), raw + calibrated, rationales |
 | `scripts/30_tier3_deberta.py` | Tier 3 DeBERTa-v3-large (plain / swap-augmented / 20% data) |
 | `scripts/40_evaluate.py` | all metrics for all runs -> `outputs/results/results.{csv,md}` |
 | `scripts/50_human_eval.py` | annotation sheet, inter-annotator agreement, error-analysis samples |
@@ -28,7 +28,7 @@ conda env `/scratch1/twang607/envs/pref-bias`.
 
 ```bash
 bash scripts/00_download.sh                 # login node: needs ~/.kaggle token + joined competition
-bash scripts/03_fetch_models.sh             # login node: needs HF login for Llama 3
+bash scripts/03_fetch_models.sh             # login node: model weights (no HF login needed)
 sbatch slurm/cpu_stage.slurm                # prepare, EDA, Tier 0, Tier 1 (no embeddings), evaluate
 sbatch slurm/tier1.slurm                    # Tier 1 with embedding features
 sbatch slurm/tier2.slurm --limit 300        # judge smoke test
@@ -58,7 +58,7 @@ Kaggle test labels are hidden.
 - **Length slope**: logistic slope of P(A)/(P(A)+P(B)) on log(len A / len B), non-tie pairs. The
   `human_labels` row gives the slope of the human votes; **excess = model - human** is the shortcut measure.
 - **Verbosity attack**: mean gain in P(padded side), share of pairs where it rises, share where the predicted winner flips to the padded side.
-- **Self-preference** (`--family llama`): judge's P(Llama side wins | not tie) minus the human rate.
+- **Self-preference** (`--family qwen`): P(Qwen side wins | not tie) minus the human rate.
 - `+swapTTA` rows: average of original and un-swapped predictions, an inference-time debias baseline.
 
 ## Known caveats

@@ -1,4 +1,4 @@
-"""Tier 2: zero-shot LLM-as-judge (Llama-3-8B-Instruct via vLLM), no fine-tuning.
+"""Tier 2: zero-shot LLM-as-judge (Qwen2.5-7B-Instruct via vLLM), no fine-tuning.
 
 Scoring mode: the judge answers with one letter (A / B / C=tie); we read the log-probabilities
 of those three tokens at the first generated position and renormalise -> P(A), P(B), P(tie).
@@ -96,8 +96,8 @@ def fit_calibration(L, y):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default="meta-llama/Meta-Llama-3-8B-Instruct")
-    ap.add_argument("--tag", default="llama3_8b")
+    ap.add_argument("--model", default="Qwen/Qwen2.5-7B-Instruct")
+    ap.add_argument("--tag", default="qwen25_7b")
     ap.add_argument("--limit", type=int, default=0, help="use only the first N rows of each set")
     ap.add_argument("--max-resp-tokens", type=int, default=2500)
     ap.add_argument("--max-prompt-tokens", type=int, default=1000)

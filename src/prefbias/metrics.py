@@ -119,7 +119,7 @@ def verbosity_attack(P, P_inflated, inflated_side):
 # ---------------------------------------------------------------- self-preference
 
 def self_preference(P, y, model_a, model_b, family):
-    """For pairs where exactly one side comes from `family` (e.g. "llama") and humans did not tie:
+    """For pairs where exactly one side comes from `family` (e.g. "qwen") and humans did not tie:
     model's mean P(family side wins | not tie) minus the human win rate of that side."""
     fa = np.char.find(np.char.lower(np.asarray(model_a, dtype=str)), family) >= 0
     fb = np.char.find(np.char.lower(np.asarray(model_b, dtype=str)), family) >= 0
