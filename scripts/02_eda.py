@@ -33,10 +33,9 @@ def main():
     }
     # tie rate vs. how similar the two lengths are
     absr = df["log_len_ratio"].abs()
-    stats["tie_rate_by_abs_len_ratio"] = (
-        df.groupby(pd.qcut(absr, 5, duplicates="drop"), observed=True)["label"]
-        .apply(lambda s: round(float((s == 2).mean()), 4)).astype(str).to_dict()
-    )
+    tie = df.groupby(pd.qcut(absr, 5, duplicates="drop"), observed=True)["label"].apply(
+        lambda s: round(float((s == 2).mean()), 4))
+    stats["tie_rate_by_abs_len_ratio"] = {str(k): v for k, v in tie.items()}
     (out / "eda.json").write_text(json.dumps(stats, indent=2, default=str))
     print(json.dumps(stats, indent=2, default=str))
 

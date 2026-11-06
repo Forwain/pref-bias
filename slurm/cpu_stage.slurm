@@ -10,7 +10,7 @@
 #   sbatch slurm/cpu_stage.slurm
 set -e
 source slurm/env.sh
-python scripts/01_prepare.py
+[ -f $PB_ROOT/data/processed/test_verbose_filler.parquet ] || python scripts/01_prepare.py
 python scripts/02_eda.py
 python scripts/10_tier0.py
 python scripts/11_tier1.py --no-emb --run tier1_lgbm_noemb
