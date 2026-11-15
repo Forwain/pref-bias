@@ -6,3 +6,4 @@ outputs/
 models/
 *.parquet
 .kaggle/
+ref/

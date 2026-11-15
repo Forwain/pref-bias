@@ -108,10 +108,20 @@ def main():
     trainer.save_model(str(ckpt / "best"))
     tok.save_pretrained(str(ckpt / "best"))
 
+    # Predict from a fresh load of the saved best model. trainer.predict() after training gave
+    # predictions far worse than the logged best eval (1.19 vs 1.013 on val) while a fresh load
+    # reproduces 1.013, so the in-trainer model state is not trusted here.
+    from importlib.util import module_from_spec, spec_from_file_location
+    from pathlib import Path
+    spec = spec_from_file_location("t3pred", Path(__file__).with_name("31_tier3_predict.py"))
+    t3pred = module_from_spec(spec); spec.loader.exec_module(t3pred)
+    del trainer, model
+    torch.cuda.empty_cache()
+    best = AutoModelForSequenceClassification.from_pretrained(str(ckpt / "best")).cuda().eval()
     results = {}
     for s in EVAL_SETS:
         df = load_split(s)
-        logits = trainer.predict(encode_frame(df, tok, args.max_len)).predictions
+        logits = t3pred.predict(best, encode_frame(df, tok, args.max_len), args.bs * 4, "fp32")
         P = softmax(logits, axis=1)
         probs_frame(df["id"], P).to_parquet(out / f"preds_{s}.parquet", index=False)
         if "label" in df:

@@ -103,11 +103,20 @@ def main():
     ap.add_argument("--max-prompt-tokens", type=int, default=1000)
     ap.add_argument("--max-model-len", type=int, default=8192)
     ap.add_argument("--rationale-n", type=int, default=0)
+    ap.add_argument("--dtype", default=None, help="bfloat16 / float16; default picks by GPU")
+    ap.add_argument("--tp", type=int, default=1, help="tensor parallel size (GPUs per model)")
     args = ap.parse_args()
 
+    import torch
     from vllm import LLM, SamplingParams
-    llm = LLM(model=args.model, dtype="bfloat16", max_model_len=args.max_model_len,
-              gpu_memory_utilization=0.9, enable_prefix_caching=True)
+    # bf16 needs compute capability >= 8 (A40/A100/L40S); V100 falls back to fp16.
+    ampere = torch.cuda.get_device_capability()[0] >= 8
+    dtype = args.dtype or ("bfloat16" if ampere else "float16")
+    # Prefix caching uses a Triton kernel that only supports Ampere+; it is a speed-up only.
+    print(f"GPU {torch.cuda.get_device_name()} -> dtype {dtype}, prefix caching {ampere}", flush=True)
+    llm = LLM(model=args.model, dtype=dtype, max_model_len=args.max_model_len,
+              gpu_memory_utilization=0.9, enable_prefix_caching=ampere,
+              tensor_parallel_size=args.tp)
     tok = llm.get_tokenizer()
     score_sp = SamplingParams(max_tokens=1, temperature=0.0, logprobs=20)
 
@@ -128,7 +137,8 @@ def main():
 
     df_val, L_val = raw_logits["val"]
     T, bias = fit_calibration(L_val, df_val["label"].to_numpy())
-    (d_cal / "params.json").write_text(json.dumps({"T": T, "bias": bias}))
+    (d_cal / "params.json").write_text(json.dumps({"T": T, "bias": bias, "model": args.model, "dtype": dtype,
+                                                   "gpu": torch.cuda.get_device_name(), "tp": args.tp}))
     for s, (df, L) in raw_logits.items():
         P = softmax(L / T + np.array(bias), axis=1)
         probs_frame(df["id"], P).to_parquet(d_cal / f"preds_{s}.parquet", index=False)
